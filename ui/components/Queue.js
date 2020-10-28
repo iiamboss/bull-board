@@ -56,13 +56,29 @@ const statuses = [
 ]
 
 const fields = {
-  latest: ['id', 'timestamps', 'progress', 'attempts', 'data', 'opts'],
-  completed: ['id', 'timestamps', 'progress', 'attempts', 'data', 'opts'],
+  latest: ['id', 'run', 'timestamps', 'progress', 'attempts', 'data', 'opts'],
+  completed: [
+    'id',
+    'run',
+    'timestamps',
+    'progress',
+    'attempts',
+    'data',
+    'opts',
+  ],
   delayed: ['id', 'timestamps', 'attempts', 'delay', 'data', 'opts'],
   paused: ['id', 'timestamps', 'attempts', 'data', 'opts'],
   active: ['id', 'timestamps', 'progress', 'attempts', 'data', 'opts'],
   waiting: ['id', 'timestamps', 'data', 'opts'],
-  failed: ['id', 'failedReason', 'timestamps', 'progress', 'attempts', 'retry'],
+  failed: [
+    'id',
+    'failedReason',
+    'run',
+    'timestamps',
+    'progress',
+    'attempts',
+    'retry',
+  ],
 }
 
 function PlusIcon({ width = 18 }) {
@@ -136,6 +152,16 @@ function CheckIcon({ width = 18 }) {
 const fieldComponents = {
   id: ({ job }) => {
     return <b>#{job.id}</b>
+  },
+  run: ({ job }) => {
+    return job.finishedOn && job.processedOn ? (
+      <div>
+        {job.finishedOn - job.processedOn}
+        <small>ms</small>
+      </div>
+    ) : (
+      <small>-</small>
+    )
   },
   timestamps: ({ job }) => {
     return (
@@ -230,27 +256,27 @@ function Jobs({ retryJob, queue: { jobs, name }, status }) {
   return (
     <table>
       <thead>
-        <tr>
-          {fields[status].map(field => (
-            <th key={field}>{field}</th>
-          ))}
-        </tr>
+      <tr>
+        {fields[status].map(field => (
+          <th key={field}>{field}</th>
+        ))}
+      </tr>
       </thead>
       <tbody>
-        {jobs.map(job => {
-          return (
-            <tr key={job.id}>
-              {fields[status].map(field => {
-                const Field = fieldComponents[field]
-                return (
-                  <td key={`${name}-${job.id}-${field}`}>
-                    <Field job={job} retryJob={retryJob(job)} />
-                  </td>
-                )
-              })}
-            </tr>
-          )
-        })}
+      {jobs.map(job => {
+        return (
+          <tr key={job.id}>
+            {fields[status].map(field => {
+              const Field = fieldComponents[field]
+              return (
+                <td key={`${name}-${job.id}-${field}`}>
+                  <Field job={job} retryJob={retryJob(job)} />
+                </td>
+              )
+            })}
+          </tr>
+        )
+      })}
       </tbody>
     </table>
   )
@@ -282,18 +308,18 @@ function QueueActions(props) {
 }
 
 export default function Queue({
-  retryAll,
-  retryJob,
-  cleanAllDelayed,
-  cleanAllFailed,
-  queue,
-  selectStatus,
-  selectedStatus,
-  pagination,
-  setPagination,
-  pageSize,
-  setPageSize,
-}) {
+                                retryAll,
+                                retryJob,
+                                cleanAllDelayed,
+                                cleanAllFailed,
+                                queue,
+                                selectStatus,
+                                selectedStatus,
+                                pagination,
+                                setPagination,
+                                pageSize,
+                                setPageSize,
+                              }) {
   const selectedStatusTotalJobs = queue.counts[selectedStatus]
 
   return (
